@@ -29,8 +29,8 @@ contract MyScript is Script {
         bytes memory data;
         CErc20Delegate delegate = new CErc20Delegate();
         WhitePaperInterestRateModel interestRateModel = new WhitePaperInterestRateModel(1, 1); 
-        CErc20Delegator cErc20 = new CErc20Delegator(address(tokenA), comptroller, interestRateModel, 18, "cTokenA", "cTokenA", 18, payable(admin), address(delegate), data);
         Unitroller unitroller = new Unitroller();
+        CErc20Delegator cErc20 = new CErc20Delegator(address(tokenA), comptroller, interestRateModel, 1e18, "cTokenA", "cTokenA", 18, payable(admin), address(delegate), data);
 
         vm.stopBroadcast();
     }
