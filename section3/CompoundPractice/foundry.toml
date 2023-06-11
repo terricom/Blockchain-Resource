@@ -1,7 +1,16 @@
 [profile.default]
 src = "src"
+test = 'test'
+script = 'script'
 out = "out"
 libs = ["lib"]
 fs_permissions = [{ access = "read", path = "./"}]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
+
+[rpc_endpoints]
+# The RPC URLs are modified versions of the default for testing initialization.
+sepolia = "${SEPOLIA_RPC_URL}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }

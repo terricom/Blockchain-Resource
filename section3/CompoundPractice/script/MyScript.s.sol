@@ -6,8 +6,10 @@ import { CErc20Delegator } from "../lib/compound-protocol/contracts/CErc20Delega
 import { CErc20Delegate } from "../lib/compound-protocol/contracts/CErc20Delegate.sol";
 import { ComptrollerInterface } from "../lib/compound-protocol/contracts/ComptrollerInterface.sol";
 import { Comptroller } from "../lib/compound-protocol/contracts/Comptroller.sol";
+import { CToken } from "../lib/compound-protocol/contracts/CToken.sol";
 import { Unitroller } from "../lib/compound-protocol/contracts/Unitroller.sol";
 import { WhitePaperInterestRateModel } from "../lib/compound-protocol/contracts/WhitePaperInterestRateModel.sol";
+import { SimplePriceOracle } from "../lib/compound-protocol/contracts/SimplePriceOracle.sol";
 import { TestERC20 } from "../contracts/test/TestERC20.sol";
 import "../lib/forge-std/src/Script.sol";
 
@@ -24,13 +26,20 @@ contract MyScript is Script {
         vm.startBroadcast(deployerPrivateKey);
         address admin = 0x1895dE8651A898E325856e7F7C011A4710Fc81ec;
 
-        ComptrollerInterface comptroller = new Comptroller();
+        Comptroller comptroller = new Comptroller();
+        Unitroller unitroller = new Unitroller();
+        unitroller._setPendingImplementation(address(comptroller));
+
+        SimplePriceOracle simpleOracle = new SimplePriceOracle();
+        comptroller._become(unitroller);
+        Comptroller(address(unitroller))._setPriceOracle(simpleOracle);
+
         TestERC20 tokenA = new TestERC20("token A", "TKA");
         bytes memory data;
         CErc20Delegate delegate = new CErc20Delegate();
-        WhitePaperInterestRateModel interestRateModel = new WhitePaperInterestRateModel(1, 1); 
-        Unitroller unitroller = new Unitroller();
-        CErc20Delegator cErc20 = new CErc20Delegator(address(tokenA), comptroller, interestRateModel, 1e18, "cTokenA", "cTokenA", 18, payable(admin), address(delegate), data);
+        WhitePaperInterestRateModel interestRateModel = new WhitePaperInterestRateModel(0, 0); 
+        CErc20Delegator cErc20 = new CErc20Delegator(address(tokenA), ComptrollerInterface(address(unitroller)), interestRateModel, 1e18, "cTokenA", "cTokenA", 18, payable(admin), address(delegate), data);
+        Comptroller(address(unitroller))._supportMarket(CToken(address(cErc20)));
 
         vm.stopBroadcast();
     }
